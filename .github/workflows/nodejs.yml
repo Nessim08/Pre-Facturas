@@ -3,7 +3,7 @@ name: Node.js CI
 on:
   push:
     branches:
-      - master
+      - main  # Cambia esto si usas "master" o alguna otra rama
 
 jobs:
   build:
@@ -16,12 +16,11 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '16'
+        node-version: '16'  # O la versión de Node.js que estés usando
 
     - name: Install dependencies
-      run: |
-        npm install
+      run: npm install
 
     - name: Run the application
-      run: |
-        npm start
+      run: npm start
+
