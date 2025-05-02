@@ -71,10 +71,38 @@ const authenticateToken = (req, res, next) => {
 
 // Ruta para la raíz del sitio (home)
 app.get('/', (req, res) => {
-  res.send('Bienvenido a la API de Pre-Facturas!');
+  res.send(`
+    <html>
+      <body>
+        <h2>Login to Pre-Facturas</h2>
+        <form action="/login" method="POST">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required><br><br>
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required><br><br>
+          <input type="submit" value="Login">
+        </form>
+      </body>
+    </html>
+  `);
 });
 
-// Rutas de la API
+// Ruta para iniciar sesión
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  
+  const user = await User.findOne({ username });
+  if (!user) return res.status(400).json({ message: 'Invalid username or password' });
+
+  const validPassword = await bcrypt.compare(password, user.password);
+  if (!validPassword) return res.status(400).json({ message: 'Invalid username or password' });
+
+  // Crear y enviar el token de autenticación
+  const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  res.json({ token, user: { username: user.username, role: user.role } });
+});
+
+// Rutas para la API
 app.post('/api/users/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
@@ -96,6 +124,10 @@ app.post('/api/users/register', async (req, res) => {
 // Subir factura
 app.post('/api/invoices/upload', authenticateToken, upload.single('invoice'), async (req, res) => {
   try {
+    if (req.user.role !== 'provider') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
     const { provider, amount } = req.body;
     
     const invoice = new Invoice({
@@ -124,6 +156,5 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
 
 
