@@ -69,7 +69,12 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Rutas
+// Ruta para la raíz del sitio (home)
+app.get('/', (req, res) => {
+  res.send('Bienvenido a la API de Pre-Facturas!');
+});
+
+// Rutas de la API
 app.post('/api/users/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
@@ -88,7 +93,24 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
-// Resto del código...
+// Subir factura
+app.post('/api/invoices/upload', authenticateToken, upload.single('invoice'), async (req, res) => {
+  try {
+    const { provider, amount } = req.body;
+    
+    const invoice = new Invoice({
+      provider,
+      amount,
+      filename: req.file.filename,
+      filepath: req.file.path
+    });
+    
+    await invoice.save();
+    res.status(201).json({ message: 'Invoice uploaded successfully', invoice });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -102,7 +124,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
 
 
 
