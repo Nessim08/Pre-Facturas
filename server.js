@@ -90,10 +90,11 @@ app.get('/', (req, res) => {
 // Ruta para iniciar sesión
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  
+
   const user = await User.findOne({ username });
   if (!user) return res.status(400).json({ message: 'Invalid username or password' });
 
+  // Comparar la contraseña ingresada con la almacenada
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) return res.status(400).json({ message: 'Invalid username or password' });
 
@@ -106,14 +107,15 @@ app.post('/login', async (req, res) => {
 app.post('/api/users/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    // Cifrar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const user = new User({
       username,
       password: hashedPassword,
       role
     });
-    
+
     await user.save();
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
@@ -156,5 +158,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 
 
