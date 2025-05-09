@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Si usas un directorio público para archivos estáticos
+app.use(express.static(path.join(__dirname, 'uploads', 'views'))); // Si usas un directorio público para archivos estáticos
 
 // Configuración para el almacenamiento de archivos
 const storage = multer.diskStorage({
