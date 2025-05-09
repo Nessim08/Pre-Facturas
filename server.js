@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'uploads', 'views'))); // Si usas un directorio público para archivos estáticos
+app.use(express.static(path.join(__dirname, 'uploads', 'views')));  // Asegúrate de que esta línea esté configurada correctamente
 
 // Configuración para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -70,7 +70,7 @@ const authenticateToken = (req, res, next) => {
 
 // Ruta para la raíz del sitio (home)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+  res.sendFile(path.join(__dirname, 'uploads', 'views', 'index.html'));  // Cambiar la ruta a 'uploads/views'
 });
 
 // Ruta para iniciar sesión
