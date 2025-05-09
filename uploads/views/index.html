@@ -1,0 +1,54 @@
+<html>
+  <body>
+    <h2>Login to Pre-Facturas</h2>
+    <form action="/login" method="POST">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required><br><br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required><br><br>
+      <input type="submit" value="Login">
+    </form>
+    
+    <h2>Register New User</h2>
+    <form id="register-form">
+      <label for="new-username">Username:</label>
+      <input type="text" id="new-username" name="username" required><br><br>
+      <label for="new-password">Password:</label>
+      <input type="password" id="new-password" name="password" required><br><br>
+      <label for="role">Role:</label>
+      <select name="role" id="role">
+        <option value="admin">Admin</option>
+        <option value="provider">Provider</option>
+      </select><br><br>
+      <input type="submit" value="Register">
+    </form>
+
+    <script>
+      // Lógica de JavaScript para manejar el registro de usuario
+      const registerForm = document.getElementById('register-form');
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevenir el comportamiento por defecto
+
+        const username = document.getElementById('new-username').value;
+        const password = document.getElementById('new-password').value;
+        const role = document.getElementById('role').value;
+
+        const response = await fetch('/api/users/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password, role })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert('User registered successfully');
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      });
+    </script>
+  </body>
+</html>
