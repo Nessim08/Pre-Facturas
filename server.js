@@ -107,6 +107,7 @@ app.post('/login', async (req, res) => {
 app.post('/api/users/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    
     // Cifrar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -158,6 +159,4 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
 
