@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -17,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public')); // Si usas un directorio público para archivos estáticos
 
 // Configuración para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -71,20 +70,7 @@ const authenticateToken = (req, res, next) => {
 
 // Ruta para la raíz del sitio (home)
 app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <body>
-        <h2>Login to Pre-Facturas</h2>
-        <form action="/login" method="POST">
-          <label for="username">Username:</label>
-          <input type="text" id="username" name="username" required><br><br>
-          <label for="password">Password:</label>
-          <input type="password" id="password" name="password" required><br><br>
-          <input type="submit" value="Login">
-        </form>
-      </body>
-    </html>
-  `);
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 // Ruta para iniciar sesión
@@ -94,7 +80,7 @@ app.post('/login', async (req, res) => {
   const user = await User.findOne({ username });
   if (!user) return res.status(400).json({ message: 'Invalid username or password' });
 
-  // Comparar la contraseña ingresada con la almacenada (cifrada)
+  // Comparar la contraseña ingresada con la almacenada
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) return res.status(400).json({ message: 'Invalid username or password' });
 
@@ -103,30 +89,20 @@ app.post('/login', async (req, res) => {
   res.json({ token, user: { username: user.username, role: user.role } });
 });
 
-// Ruta para registrar usuarios (crear nuevos usuarios)
+// Ruta para crear usuario (registro)
 app.post('/api/users/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
-
-    // Verificar si el usuario ya existe
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists' });
-    }
-
     // Cifrar la contraseña antes de guardarla
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear un nuevo usuario con la contraseña cifrada
     const user = new User({
       username,
-      password: hashedPassword, // Guardar la contraseña cifrada
-      role: role || 'provider' // Si no se especifica el rol, por defecto será 'provider'
+      password: hashedPassword,
+      role
     });
 
-    // Guardar el usuario en la base de datos
     await user.save();
-
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -168,3 +144,4 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
